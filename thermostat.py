@@ -1,27 +1,32 @@
 import RPi.GPIO as GPIO
 import time, threading, requests
 
-GPIO.setup(GPIO.BCM)
+GPIO.setmode(GPIO.BCM)
 
 # ~~~~~~~~ PIN SETUP ~~~~~~~~
-furnacePin = 17 # pin 11
+global furnacePin, tempPin, ioTestPin, runTestPin
+furnacePin = 17 # pin 11 WARNING: CREATES 'PIN IN USE' WARNING
 tempPin = 27 # pin 13
 ioTestPin = 26 # pin 37
 runTestPin = 16 # pin 36
 
-GPIO.setup(furnacePIn, GPIO.OUT)
+GPIO.setup(furnacePin, GPIO.OUT)
 GPIO.setup(tempPin, GPIO.IN)
 GPIO.setup(ioTestPin, GPIO.IN)
+GPIO.setup(runTestPin, GPIO.IN)
 
 # ~~~~~~~~ INIT VARIABLES ~~~~~~~~~
+global processDelay, furnaceOn, previousTime
 processDelay = 300 # in seconds
 furnaceOn = False
 previousTime = time.time()
 
 # ~~~~~~~~ API URLS ~~~~~~~~~~~~
 urlConfig = 'https://www.google.com'
+urlTempData = 'https://www.google.com'
 
 # ~~~~~~~~ CONFIG VARIABLES ~~~~~~~~~
+global config
 config = dict(
   running = True,
   transmitDelay = 300, # server send delay (in seconds)
@@ -32,6 +37,7 @@ config = dict(
 
 def initializeApp():
   # Read from default config file and initialize config dictionary
+  print('all functions must have actual code in them')
 
 def updateConfig():
   global config
@@ -58,36 +64,40 @@ def sendTemp(temp):
 
 def convertTemp(serializedTemp):
   # Convert temperature data from ADC value to deg Farenheight
+  print('convertTemp fired!')
 
 def readConfig():
   # readConfig from static file
+  print('readConfig fired!')
 
 def writeConfig():
   # write config to static file
+  print('writeConfig fired!')
 
 def scheduler(curTime):
-  if (curTime >= nextScheduledTime):
-    global config
+  global config
+  if (curTime >= config['nextScheduledTime']):
     config['targetTemp'] = config['nextScheduledTemp']
     readSchedule(config['nextScheduledTime'])
 
 def readSchedule(curTime):
   # Read schedule file and return nextScheduledTemp and nextScheduledTime
+  print('readSchedule fired!')
 
 def ioTestToggle():
   furnaceControl(not furnaceOn)
 
-def ioTestToggle():
+def ioRunToggle():
   global config
   config['running'] = False
 
 # Initialize listener on ioTestPin
-GPIO.add_event_detect(ioTestPin, GPIO.RISING, callback=ioTestToggle(), bouncetime=200)
-GPIO.add_event_detect(runTestPin, GPIO.RISING, callback=ioRunToggle(), bouncetime=20)
+GPIO.add_event_detect(ioTestPin, GPIO.RISING, callback=ioTestToggle, bouncetime=200)
+GPIO.add_event_detect(runTestPin, GPIO.RISING, callback=ioRunToggle, bouncetime=20)
 
 # Run scheduling process
 while config['running']:
-  global previousTime, config
+  global previousTime, config, ioTestPin, ioRunPin
   
   temp = readTemp()
   curTime = time.time()
@@ -97,8 +107,9 @@ while config['running']:
   scheduler(cycleTime)
   
   # Send stored temperature data
-  if (cycleTime > transmitDelay):
+  if (cycleTime > config['transmitDelay']):
     previousTime = time.time()
     sendTemp()
   
-  sleep(.5)
+  print('ioTestPin: ', GPIO.input(ioTestPin), 'runTestPin: ', GPIO.input(runTestPin), 'cycleTime: ', cycleTime)
+  time.sleep(.5)
