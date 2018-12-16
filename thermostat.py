@@ -22,8 +22,10 @@ furnaceOn = False
 previousTime = time.time()
 
 # ~~~~~~~~ API URLS ~~~~~~~~~~~~
-urlConfig = 'https://www.google.com'
-urlTempData = 'https://www.google.com'
+global urlRoot, urlConfig, urlTempData
+urlRoot = ''
+urlConfig = '/thermostat/config'
+urlTempData = '/thermostat/temperature'
 
 # ~~~~~~~~ CONFIG VARIABLES ~~~~~~~~~
 global config
@@ -61,6 +63,8 @@ def readTemp():
 def sendTemp(temp):
   # Send temp data to server
   print('sendTemp has fired!')
+  requests.post(urlRoot + urlTempData)
+  
 
 def convertTemp(serializedTemp):
   # Convert temperature data from ADC value to deg Farenheight
