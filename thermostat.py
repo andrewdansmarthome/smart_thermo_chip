@@ -28,6 +28,7 @@ urlTempData = 'https://www.google.com'
 # ~~~~~~~~ CONFIG VARIABLES ~~~~~~~~~
 global config
 config = dict(
+  id = 1,
   running = True,
   transmitDelay = 300, # server send delay (in seconds)
   targetTemp = 70, # current target temperature (degrees farenheight)
@@ -38,6 +39,7 @@ config = dict(
 def initializeApp():
   # Read from default config file and initialize config dictionary
   print('all functions must have actual code in them')
+  requests.post(urlConfig)
 
 def updateConfig():
   global config
