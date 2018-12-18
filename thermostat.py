@@ -103,8 +103,8 @@ def ioRunToggle():
   config['running'] = False
 
 # Initialize listener on ioTestPin
-GPIO.add_event_detect(ioTestPin, GPIO.RISING, callback=ioTestToggle, bouncetime=200)
-GPIO.add_event_detect(runTestPin, GPIO.RISING, callback=ioRunToggle, bouncetime=20)
+GPIO.add_event_detect(ioTestPin, GPIO.FALLING, callback=ioTestToggle, bouncetime=200)
+GPIO.add_event_detect(runTestPin, GPIO.RISING, callback=ioRunToggle, bouncetime=200)
 
 # Run scheduling process
 while config['running']:
