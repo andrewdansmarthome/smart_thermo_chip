@@ -16,8 +16,7 @@ GPIO.setup(ioTestPin, GPIO.IN)
 GPIO.setup(runTestPin, GPIO.IN)
 
 # ~~~~~~~~ INIT VARIABLES ~~~~~~~~~
-global processDelay, furnaceOn, previousTime, running
-processDelay = 300 # in seconds
+global furnaceOn, previousTime, running
 furnaceOn = False
 previousTime = time.time()
 running = True
@@ -31,11 +30,21 @@ urlTempData = urlRoot + '/thermostat/temperature'
 # ~~~~~~~~ CONFIG VARIABLES ~~~~~~~~~
 global config
 config = dict(
-  id = 1,
+  chipId = 1,
   transmitDelay = 300, # server send delay (in seconds)
+  processDelay = 300, # in seconds
   targetTemp = 70, # current target temperature (degrees farenheight)
   nextScheduledTime = 0, # time since epoch for next scheduled action (in seconds)
   nextScheduledTemp = 68 # scheduled temp (deg F)
+)
+
+# ~~~~~~~~ Default Schedule ~~~~~~~~~~
+global schedule
+schedule = dict(
+  targetTemp = 70, # current target temperature (degrees farenheight)
+  nextScheduledTime = 0, # time since epoch for next scheduled action (in seconds)
+  nextScheduledTemp = 68, # scheduled temp (deg F)
+  schedule = {} # Should be a queue popping to nextScheduled
 )
 
 def initializeApp():
