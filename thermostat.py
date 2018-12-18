@@ -17,10 +17,11 @@ GPIO.setup(ioTestPin, GPIO.IN)
 GPIO.setup(runTestPin, GPIO.IN)
 
 # ~~~~~~~~ INIT VARIABLES ~~~~~~~~~
-global processDelay, furnaceOn, previousTime
+global processDelay, furnaceOn, previousTime, running
 processDelay = 300 # in seconds
 furnaceOn = False
 previousTime = time.time()
+running = True
 
 # ~~~~~~~~ API URLS ~~~~~~~~~~~~
 global urlRoot, urlConfig, urlTempData
@@ -31,7 +32,7 @@ urlTempData = urlRoot + '/temperature'
 # ~~~~~~~~ CONFIG VARIABLES ~~~~~~~~~
 global config
 config = dict(
-  running = True,
+  id = 1,
   transmitDelay = 300, # server send delay (in seconds)
   targetTemp = 70, # current target temperature (degrees farenheight)
   nextScheduledTime = 0, # time since epoch for next scheduled action (in seconds)
@@ -51,15 +52,21 @@ testTemp = dict(
 def initializeApp():
   # Read from default config file and initialize config dictionary
   print('all functions must have actual code in them')
+  global config
+  res = requests.get(urlConfig + config['id'])
+  data = res.json()
+  print('data', data)
+  config = data['config']
 
 def updateConfig():
   global config
   initURL = urlConfig
   res = requests.get(url = urlConfig)
   data = res.json()
-  config = res['config']
+  config = data['config']
 
 def furnaceControl(turnFurnaceOn = furnaceOn):
+  global furnaceOn
   if (turnFurnaceOn):
     GPIO.output(furnacePin, GPIO.HIGH)
     furnaceOn = True
@@ -74,7 +81,6 @@ def readTemp():
 def sendTemp(temp):
   # Send temp data to server
   print('sendTemp has fired!')
-  print(json.dumps(temp))
   requests.post(urlTempData, json = temp)
 
 def convertTemp(serializedTemp):
@@ -111,8 +117,8 @@ def ioRunToggle():
   config['running'] = False
 
 # Initialize listener on ioTestPin
-GPIO.add_event_detect(ioTestPin, GPIO.RISING, callback=ioTestToggle, bouncetime=200)
-GPIO.add_event_detect(runTestPin, GPIO.RISING, callback=ioRunToggle, bouncetime=20)
+GPIO.add_event_detect(ioTestPin, GPIO.FALLING, callback=ioTestToggle, bouncetime=200)
+GPIO.add_event_detect(runTestPin, GPIO.RISING, callback=ioRunToggle, bouncetime=200)
 
 sendConfig()
 
@@ -133,7 +139,7 @@ while config['running']:
   if (cycleTime > config['transmitDelay']):
     previousTime = time.time()
     sendTemp(testTemp)
-  
+
   sendTemp(testTemp)
   print('ioTestPin: ', GPIO.input(ioTestPin), 'runTestPin: ', GPIO.input(runTestPin), 'cycleTime: ', cycleTime)
   time.sleep(5)
