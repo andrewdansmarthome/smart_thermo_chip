@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
-import time, threading, requests
+import time, threading, requests, json
+from env.secrets import ENV_IP, ENV_LOCATION_ID
 
 GPIO.setmode(GPIO.BCM)
 
@@ -23,9 +24,9 @@ running = True
 
 # ~~~~~~~~ API URLS ~~~~~~~~~~~~
 global urlRoot, urlConfig, urlTempData
-urlRoot = ''
-urlConfig = urlRoot + '/thermostat/config'
-urlTempData = urlRoot + '/thermostat/temperature'
+urlRoot = ENV_IP + '/api/thermostat'
+urlConfig = urlRoot + '/config/1'
+urlTempData = urlRoot + '/temperature'
 
 # ~~~~~~~~ CONFIG VARIABLES ~~~~~~~~~
 global config
@@ -38,13 +39,14 @@ config = dict(
   nextScheduledTemp = 68 # scheduled temp (deg F)
 )
 
-# ~~~~~~~~ Default Schedule ~~~~~~~~~~
-global schedule
-schedule = dict(
-  targetTemp = 70, # current target temperature (degrees farenheight)
-  nextScheduledTime = 0, # time since epoch for next scheduled action (in seconds)
-  nextScheduledTemp = 68, # scheduled temp (deg F)
-  schedule = {} # Should be a queue popping to nextScheduled
+# ~~~~~ TEST VARIABLES ~~~~~~
+global testTemp
+testTemp = dict(
+  temperature = 70,
+  serializedValue = 1,
+  time = int(time.time()),
+  targetTemperature = 72,
+  locationId = ENV_LOCATION_ID
 )
 
 def initializeApp():
@@ -59,7 +61,7 @@ def initializeApp():
 def updateConfig():
   global config
   initURL = urlConfig
-  res = requests.get(url = initURL)
+  res = requests.get(url = urlConfig)
   data = res.json()
   config = data['config']
 
@@ -79,8 +81,7 @@ def readTemp():
 def sendTemp(temp):
   # Send temp data to server
   print('sendTemp has fired!')
-  PAYLOAD = dict( temp = 1 )
-  requests.post(urlTempData, PAYLOAD)
+  requests.post(urlTempData, json = temp)
 
 def convertTemp(serializedTemp):
   # Convert temperature data from ADC value to deg Farenheight
@@ -93,6 +94,10 @@ def readConfig():
 def writeConfig():
   # write config to static file
   print('writeConfig fired!')
+
+def sendConfig():
+	# updating config in db
+  requests.post(urlConfig, json=config)
 
 def scheduler(curTime):
   global config
@@ -112,12 +117,16 @@ def ioRunToggle():
   config['running'] = False
 
 # Initialize listener on ioTestPin
-GPIO.add_event_detect(ioTestPin, GPIO.RISING, callback=ioTestToggle, bouncetime=200)
-GPIO.add_event_detect(runTestPin, GPIO.RISING, callback=ioRunToggle, bouncetime=20)
+GPIO.add_event_detect(ioTestPin, GPIO.FALLING, callback=ioTestToggle, bouncetime=200)
+GPIO.add_event_detect(runTestPin, GPIO.RISING, callback=ioRunToggle, bouncetime=200)
+
+sendConfig()
 
 # Run scheduling process
 while config['running']:
   global previousTime, config, ioTestPin, ioRunPin
+  
+  print(testTemp)
   
   temp = readTemp()
   curTime = time.time()
@@ -129,7 +138,8 @@ while config['running']:
   # Send stored temperature data
   if (cycleTime > config['transmitDelay']):
     previousTime = time.time()
-    sendTemp(1)
-  
+    sendTemp(testTemp)
+
+  sendTemp(testTemp)
   print('ioTestPin: ', GPIO.input(ioTestPin), 'runTestPin: ', GPIO.input(runTestPin), 'cycleTime: ', cycleTime)
-  time.sleep(.5)
+  time.sleep(5)
