@@ -1,8 +1,19 @@
 import RPi.GPIO as GPIO
-import time, threading, requests, json
-from env.secrets import ENV_IP, ENV_LOCATION_ID
+import time, threading, requests, json, spidev, sys
+import Adafruit_GPIO.SPI as SPI
+import Adafruit_MCP3008
 
+#from env.secrets import ENV_IP, ENV_LOCATION_ID
+ENV_IP = "http://192.168.1.173:8080"
+ENV_LOCATION_ID = 1
 GPIO.setmode(GPIO.BCM)
+mcp = Adafruit_MCP3008.MCP3008(clk = 21, cs = 8, miso = 19, mosi = 20)
+# ~~~~~~~~~ SPI SETUP ~~~~~~~
+bus = 0
+device = 0
+spi = spidev.SpiDev()
+spi.open(bus, device)
+spi.max_speed_hz = 488000
 
 # ~~~~~~~~ PIN SETUP ~~~~~~~~
 global furnacePin, tempPin, ioTestPin, runTestPin
@@ -117,6 +128,28 @@ def ioRunToggle():
   global config
   config['running'] = False
 
+def buildReadCommand(channel):
+  startBit = 0x01
+  singleEnded = 0x08
+  return [startBit, singleEnded | (channel << 4), 0]
+
+def processAdcValue(result):
+  byte2 = (result[1] & 0x03)
+  return (byte2 << 8) | result[2]
+
+def readAdc(channel):
+  msg = 0b11
+  msg = ((msg << 1) + channel) << 5
+  msg = [msg, 0b00000000]
+  reply = spi.xfer2(msg)
+  adc = 0
+  for n in reply:
+    adc = (adc << 8) + n
+  adc = adc >> 1
+  voltage = (5 * adc) / 1024
+  print("msg: ", msg, 'reply: ', reply, "adc: ", adc, "voltage: ", voltage)
+  return adc
+
 # Initialize listener on ioTestPin
 GPIO.add_event_detect(ioTestPin, GPIO.FALLING, callback=ioTestToggle, bouncetime=200)
 GPIO.add_event_detect(runTestPin, GPIO.RISING, callback=ioRunToggle, bouncetime=200)
@@ -124,23 +157,31 @@ GPIO.add_event_detect(runTestPin, GPIO.RISING, callback=ioRunToggle, bouncetime=
 sendConfig()
 
 # Run scheduling process
-while running:
-  global previousTime, config, ioTestPin, ioRunPin
+try: 
+  while running:
+    global previousTime, config, ioTestPin, ioRunPin
+    print(testTemp)
   
-  print(testTemp)
+    temp = readTemp()
+    curTime = time.time()
+    cycleTime = curTime - previousTime
   
-  temp = readTemp()
-  curTime = time.time()
-  cycleTime = curTime - previousTime
+    # Run scheduler
+    scheduler(cycleTime)
   
-  # Run scheduler
-  scheduler(cycleTime)
-  
-  # Send stored temperature data
-  if (cycleTime > config['transmitDelay']):
-    previousTime = time.time()
-    sendTemp(testTemp)
+    # Send stored temperature data
+    if (cycleTime > config['transmitDelay']):
+      previousTime = time.time()
+      sendTemp(testTemp)
 
-  sendTemp(testTemp)
-  print('ioTestPin: ', GPIO.input(ioTestPin), 'runTestPin: ', GPIO.input(runTestPin), 'cycleTime: ', cycleTime)
-  time.sleep(5)
+    sendTemp(testTemp)
+    sensorTemp = readAdc(0)
+    print("temp: ", sensorTemp, str(sensorTemp))
+    values = [0]*8
+    for i in range(8):
+      values[i] = mcp.read_adc(i)
+    print(' | {0:>4}  | {1:>4}  | {2:>4} | {3:>4} | {4:>4} | {5:>4} | {6:>4}  | {7:>4} |'.format(*values))
+    time.sleep(5)
+except KeyboardInterrupt: 
+  spi.close()
+  sys.exit(0)
