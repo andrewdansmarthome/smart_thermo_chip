@@ -1,8 +1,12 @@
 import RPi.GPIO as GPIO
-import time, threading, requests, json
-from env.secrets import ENV_IP, ENV_LOCATION_ID
+import time, threading, requests, json, sys
+from env.env import ENV_API_URL, ENV_LOCATION_ID
+from config import Config, initConfig
+from scheduler import Scheduler
 
 GPIO.setmode(GPIO.BCM)
+config = Config(initConfig)
+scheduler = Scheduler(config.chipId)
 
 # ~~~~~~~~ PIN SETUP ~~~~~~~~
 global furnacePin, tempPin, ioTestPin, runTestPin
@@ -17,23 +21,23 @@ GPIO.setup(ioTestPin, GPIO.IN)
 GPIO.setup(runTestPin, GPIO.IN)
 
 # ~~~~~~~~ INIT VARIABLES ~~~~~~~~~
-global processDelay, furnaceOn, previousTime, running
-processDelay = 300 # in seconds
+global furnaceOn, previousTime, running
 furnaceOn = False
 previousTime = time.time()
 running = True
 
 # ~~~~~~~~ API URLS ~~~~~~~~~~~~
 global urlRoot, urlConfig, urlTempData
-urlRoot = ENV_IP + '/api/thermostat'
+urlRoot = ENV_API_URL + '/api/thermostat'
 urlConfig = urlRoot + '/config/1'
 urlTempData = urlRoot + '/temperature'
 
 # ~~~~~~~~ CONFIG VARIABLES ~~~~~~~~~
 global config
 config = dict(
-  id = 1,
+  chipId = 1,
   transmitDelay = 300, # server send delay (in seconds)
+  processDelay = 300, # in seconds
   targetTemp = 70, # current target temperature (degrees farenheight)
   nextScheduledTime = 0, # time since epoch for next scheduled action (in seconds)
   nextScheduledTemp = 68 # scheduled temp (deg F)
@@ -116,30 +120,33 @@ def ioRunToggle():
   global config
   config['running'] = False
 
-# Initialize listener on ioTestPin
-GPIO.add_event_detect(ioTestPin, GPIO.FALLING, callback=ioTestToggle, bouncetime=200)
-GPIO.add_event_detect(runTestPin, GPIO.RISING, callback=ioRunToggle, bouncetime=200)
+class Thermostat:
+  # def __init__(self):
 
-sendConfig()
+  def run(self):
+    # Initialize listener on ioTestPin
+    GPIO.add_event_detect(ioTestPin, GPIO.FALLING, callback=ioTestToggle, bouncetime=200)
+    GPIO.add_event_detect(runTestPin, GPIO.RISING, callback=ioRunToggle, bouncetime=200)
+    sendConfig()
+    # Run scheduling process
+    while config['running']:
+      global previousTime, config, ioTestPin, ioRunPin
 
-# Run scheduling process
-while config['running']:
-  global previousTime, config, ioTestPin, ioRunPin
-  
-  print(testTemp)
-  
-  temp = readTemp()
-  curTime = time.time()
-  cycleTime = curTime - previousTime
-  
-  # Run scheduler
-  scheduler(cycleTime)
-  
-  # Send stored temperature data
-  if (cycleTime > config['transmitDelay']):
-    previousTime = time.time()
-    sendTemp(testTemp)
+      print(testTemp)
 
-  sendTemp(testTemp)
-  print('ioTestPin: ', GPIO.input(ioTestPin), 'runTestPin: ', GPIO.input(runTestPin), 'cycleTime: ', cycleTime)
-  time.sleep(5)
+      temp = readTemp()
+      curTime = time.time()
+      cycleTime = curTime - previousTime
+
+      # Run scheduler
+      scheduler(cycleTime)
+
+      # Send stored temperature data
+      if (cycleTime > config['transmitDelay']):
+        previousTime = time.time()
+        sendTemp(testTemp)
+
+      sendTemp(testTemp)
+      print('ioTestPin: ', GPIO.input(ioTestPin), 'runTestPin: ',
+            GPIO.input(runTestPin), 'cycleTime: ', cycleTime)
+      time.sleep(5)
