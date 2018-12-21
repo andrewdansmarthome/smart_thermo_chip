@@ -11,14 +11,13 @@ urlSchedule = ENV_API_URL + '/thermostat/scheduler'
 
 # ~~~~~~~~ CONFIG VARIABLES ~~~~~~~~~
 initSchedule = dict(
-  chipId = 1,
   nextScheduledTime = time.time() + 300, # time since epoch for next scheduled action (in seconds)
   nextScheduledTemp = 68 # scheduled temp (deg F)
 )
 
 class Scheduler:
   def __init__(self, schedule):
-    self.chipId = schedule['chipId']
+    self.targetTemp = schedule['nextScheduledTemp']
     self.nextScheduledTemp = schedule['nextScheduledTemp']
     self.nextScheduledTime = schedule['nextScheduledTime']
   
@@ -30,3 +29,10 @@ class Scheduler:
   def getSchedule(self, curTime):
     # Read schedule file and return nextScheduledTemp and nextScheduledTime
     print('readSchedule fired!')
+    payload = {
+      'nextScheduledTemp': self.nextScheduledTemp,
+      'nextScheduledTime': self.nextScheduledTime
+    }
+    res = requests.get(url = urlSchedule, params = payload)
+    self.nextScheduledTemp = res['nextScheduledTemp']
+    self.nextScheduledTime = res['nextScheduledTime']

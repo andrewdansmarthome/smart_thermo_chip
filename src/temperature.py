@@ -1,36 +1,9 @@
 import RPi.GPIO as GPIO
 import time, threading, requests, json, sys
 from env.env import ENV_API_URL, ENV_LOCATION_ID
-from config import Config, initConfig
-from scheduler import Scheduler
-
-GPIO.setmode(GPIO.BCM)
-config = Config(initConfig)
-scheduler = Scheduler(config.chipId)
-
-# ~~~~~~~~ PIN SETUP ~~~~~~~~
-global furnacePin, tempPin, ioTestPin, runTestPin
-furnacePin = 17 # pin 11 WARNING: CREATES 'PIN IN USE' WARNING
-tempPin = 27 # pin 13
-ioTestPin = 26 # pin 37
-runTestPin = 16 # pin 36
-
-GPIO.setup(furnacePin, GPIO.OUT)
-GPIO.setup(tempPin, GPIO.IN)
-GPIO.setup(ioTestPin, GPIO.IN)
-GPIO.setup(runTestPin, GPIO.IN)
-
-# ~~~~~~~~ INIT VARIABLES ~~~~~~~~~
-global furnaceOn, previousTime, running
-furnaceOn = False
-previousTime = time.time()
-running = True
 
 # ~~~~~~~~ API URLS ~~~~~~~~~~~~
-global urlRoot, urlConfig, urlTempData
-urlRoot = ENV_API_URL + '/api/thermostat'
-urlConfig = urlRoot + '/config/1'
-urlTempData = urlRoot + '/temperature'
+urlSchedule = ENV_API_URL + '/thermostat/temperature'
 
 # ~~~~~~~~ CONFIG VARIABLES ~~~~~~~~~
 global config
@@ -52,6 +25,39 @@ testTemp = dict(
   targetTemperature = 72,
   locationId = ENV_LOCATION_ID
 )
+
+# ~~~~~~~~ CONFIG VARIABLES ~~~~~~~~~
+initTemp = dict(
+    # default temp setup
+    tempPin = 27,
+    temperature = 0,
+    serializedValue = 0,
+    targetTemperature = 70
+)
+
+class Temperature:
+  def __init__(self, temp):
+    self.tempPin = temp['tempPin']
+    self.temperature = temp['temperature']
+    self.serializedValue = temp['serializedValue']
+    self.targetTemperature = temp['temperaute']
+
+  def scheduler(self, curTime):
+    if (curTime >= self.nextScheduledTime):
+      self.targetTemp = self.nextScheduledTemp
+      self.getSchedule(self.nextScheduledTime)
+
+  def getSchedule(self, curTime):
+    # Read schedule file and return nextScheduledTemp and nextScheduledTime
+    print('readSchedule fired!')
+    payload = {
+        'nextScheduledTemp': self.nextScheduledTemp,
+        'nextScheduledTime': self.nextScheduledTime
+    }
+    res = requests.get(url=urlSchedule, params=payload)
+    self.nextScheduledTemp = res['nextScheduledTemp']
+    self.nextScheduledTime = res['nextScheduledTime']
+
 
 def initializeApp():
   # Read from default config file and initialize config dictionary
