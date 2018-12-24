@@ -3,22 +3,14 @@ import time, threading, requests, json, sys
 from env.env import ENV_API_URL, ENV_LOCATION_ID
 from config import Config, initConfig
 from scheduler import Scheduler
+from temperature import Temperature
+from board_setup import BoardSetup
 
 GPIO.setmode(GPIO.BCM)
+
+boardSetup = BoardSetup()
 config = Config(initConfig)
 scheduler = Scheduler(config.chipId)
-
-# ~~~~~~~~ PIN SETUP ~~~~~~~~
-global furnacePin, tempPin, ioTestPin, runTestPin
-furnacePin = 17 # pin 11 WARNING: CREATES 'PIN IN USE' WARNING
-tempPin = 27 # pin 13
-ioTestPin = 26 # pin 37
-runTestPin = 16 # pin 36
-
-GPIO.setup(furnacePin, GPIO.OUT)
-GPIO.setup(tempPin, GPIO.IN)
-GPIO.setup(ioTestPin, GPIO.IN)
-GPIO.setup(runTestPin, GPIO.IN)
 
 # ~~~~~~~~ INIT VARIABLES ~~~~~~~~~
 global furnaceOn, previousTime, running
@@ -26,32 +18,8 @@ furnaceOn = False
 previousTime = time.time()
 running = True
 
-# ~~~~~~~~ API URLS ~~~~~~~~~~~~
-global urlRoot, urlConfig, urlTempData
-urlRoot = ENV_API_URL + '/api/thermostat'
-urlConfig = urlRoot + '/config/1'
-urlTempData = urlRoot + '/temperature'
-
-# ~~~~~~~~ CONFIG VARIABLES ~~~~~~~~~
-global config
-config = dict(
-  chipId = 1,
-  transmitDelay = 300, # server send delay (in seconds)
-  processDelay = 300, # in seconds
-  targetTemp = 70, # current target temperature (degrees farenheight)
-  nextScheduledTime = 0, # time since epoch for next scheduled action (in seconds)
-  nextScheduledTemp = 68 # scheduled temp (deg F)
-)
-
-# ~~~~~ TEST VARIABLES ~~~~~~
-global testTemp
-testTemp = dict(
-  temperature = 70,
-  serializedValue = 1,
-  time = int(time.time()),
-  targetTemperature = 72,
-  locationId = ENV_LOCATION_ID
-)
+# ~~~~~~~~ API URL ~~~~~~~~~~~~
+urlThermostat = ENV_API_URL + '/api/thermostat'
 
 def initializeApp():
   # Read from default config file and initialize config dictionary
@@ -60,13 +28,6 @@ def initializeApp():
   res = requests.get(urlConfig + config['id'])
   data = res.json()
   print('data', data)
-  config = data['config']
-
-def updateConfig():
-  global config
-  initURL = urlConfig
-  res = requests.get(url = urlConfig)
-  data = res.json()
   config = data['config']
 
 def furnaceControl(turnFurnaceOn = furnaceOn):
