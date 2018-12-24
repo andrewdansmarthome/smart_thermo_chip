@@ -1,15 +1,12 @@
 import RPi.GPIO as GPIO
 import time, threading, requests
-from main import ENV_API_URL
+from env.env import ENV_API_URL
 
 # ~~~~~~~~ DEFAULT CONFIG ~~~~~~~~~
 initConfig = dict(
   chipId = 1,
   transmitDelay = 300, # server send delay (in seconds)
   processDelay = 300, # in seconds
-  targetTemp = 70, # current target temperature (degrees farenheight)
-  nextScheduledTime = 0, # time since epoch for next scheduled action (in seconds)
-  nextScheduledTemp = 68 # scheduled temp (deg F)
 )
 
 # ~~~~~~~~ API URLS ~~~~~~~~~~~~
@@ -27,10 +24,14 @@ class Config:
     for item in data.keys():
       setattr(self, item, data[item])
 
-  def readConfig():
+  def readConfig(self):
     # readConfig from static file
     print('readConfig fired!')
 
-  def writeConfig():
+  def writeConfig(self):
     # write config to static file
     print('writeConfig fired!')
+    payload = self
+    res = requests.post(url = urlConfig, json = payload)
+    print('res: ', res)
+    return res

@@ -3,14 +3,13 @@ import time, threading, requests, json, sys
 from env.env import ENV_API_URL, ENV_LOCATION_ID
 from config import Config, initConfig
 from scheduler import Scheduler
-from temperature import Temperature
+from temperature import Temperature, initTemp
 from board_setup import BoardSetup
-
-GPIO.setmode(GPIO.BCM)
 
 boardSetup = BoardSetup()
 config = Config(initConfig)
 scheduler = Scheduler(config.chipId)
+temperature = Temperature(initTemp)
 
 # ~~~~~~~~ INIT VARIABLES ~~~~~~~~~
 global furnaceOn, previousTime, running
@@ -20,15 +19,6 @@ running = True
 
 # ~~~~~~~~ API URL ~~~~~~~~~~~~
 urlThermostat = ENV_API_URL + '/api/thermostat'
-
-def initializeApp():
-  # Read from default config file and initialize config dictionary
-  print('all functions must have actual code in them')
-  global config
-  res = requests.get(urlConfig + config['id'])
-  data = res.json()
-  print('data', data)
-  config = data['config']
 
 def furnaceControl(turnFurnaceOn = furnaceOn):
   global furnaceOn
