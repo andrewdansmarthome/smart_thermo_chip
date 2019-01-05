@@ -1,11 +1,19 @@
+print('In Thermostat')
 import RPi.GPIO as GPIO
 import time, threading, requests, json, sys
+print('packages imported')
 from env_setup import ENV_API_URL, ENV_LOCATION_ID
-from config import Config, initConfig
-from scheduler import Scheduler
-from temperature import Temperature, initTemp
-from pin_setup import PinSetup
-from furnace import Furnace
+print('imported ES')
+from src.pin_setup import PinSetup
+print('imported PS')
+from src.config import Config, initConfig
+print('imported config')
+from src.scheduler import Scheduler
+print('imported Sched')
+from src.temperature import Temperature, initTemp
+print('imported temp')
+from src.furnace import Furnace
+print('classes imported')
 
 # ~~~~~~~~ INIT THERMOSTAT DEPENDENCIES ~~~~~~~~
 pins = PinSetup()
