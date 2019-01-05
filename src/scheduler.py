@@ -14,10 +14,11 @@ class Scheduler:
     self.nextScheduledTemp = schedule['nextScheduledTemp']
     self.nextScheduledTime = schedule['nextScheduledTime']
   
-  def scheduler(self, curTime):
+  def checkSchedule(self, curTime):
     if (curTime >= self.nextScheduledTime):
       self.targetTemp = self.nextScheduledTemp
       self.getSchedule(self.nextScheduledTime)
+    return self.targetTemp
   
   def getSchedule(self, curTime):
     # Read schedule file and return nextScheduledTemp and nextScheduledTime
@@ -29,3 +30,7 @@ class Scheduler:
     res = requests.get(url = apiScheduler, params = payload)
     self.nextScheduledTemp = res['nextScheduledTemp']
     self.nextScheduledTime = res['nextScheduledTime']
+
+  def readSchedule(self, curTime):
+    # Read schedule file and return nextScheduledTemp and nextScheduledTime
+    print('readSchedule fired!')

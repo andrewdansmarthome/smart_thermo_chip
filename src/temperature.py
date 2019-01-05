@@ -1,7 +1,8 @@
 import RPi.GPIO as GPIO
-import time, threading, requests, json, sys
-from env.env import ENV_API_URL, ENV_LOCATION_ID
+import time, requests, json, sys
+from env.env import ENV_LOCATION_ID
 from api_urls import apiTemperature
+import Adafruit_MCP3008 as ADC
 
 # ~~~~~ TEST VARIABLES ~~~~~~
 testTemp = dict(
@@ -25,28 +26,30 @@ initTemp = dict(
 )
 
 class Temperature:
-  def __init__(self, tempData):
+  def __init__(self, tempData, pins):
     self.tempPin = tempData['tempPin']
     self.temp = tempData['temperature']
     self.serializedTemp = tempData['serializedTemp']
-    self.targetTemp = tempData['targetTemperaute']
     self.serialToVoltageFactor = tempData['serialToVoltageFactor']
     self.voltageToTempFactor = tempData['voltageToTempFactor']
     self.voltageOffset = tempData['voltageOffset']
     self.tempStore = dict()
+    self.mcp = ADC.MCP3008(clk=pins.clk, cs=pins.cs, miso=pins.miso, mosi=pins.mosi)
   
-  def sendTemp(self, temp):
+  def sendTemp(self):
     # Send temp data to server
     print('sendTemp has fired!')
-    requests.post(apiTemperature, json=temp)
+    requests.post(apiTemperature, json=self.tempStore)
   
   def convertTemp(self, serializedTemp):
     # Convert temperature data from ADC value to deg Farenheight
     print('convertTemp fired!')
   
   def readTemp(self):
-    curVoltage = GPIO.input(self.tempPin)
-    curTime = int(time.time())
-    curTemp = self.convertTemp(curVoltage)
-    self.tempStore[curTime] = 
+    values = [0]*8
+    for i in range(8):
+      values[i] = self.mcp.read_adc(i)
+    print(' | {0:>4}  | {1:>4}  | {2:>4} | {3:>4} | {4:>4} | {5:>4} | {6:>4}  | {7:>4} |'.format(*values))
+
+    return values[0]
 

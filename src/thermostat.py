@@ -5,62 +5,51 @@ from config import Config, initConfig
 from scheduler import Scheduler
 from temperature import Temperature, initTemp
 from pin_setup import PinSetup
+from furnace import Furnace
 
+# ~~~~~~~~ INIT THERMOSTAT DEPENDENCIES ~~~~~~~~
 pins = PinSetup()
 config = Config(initConfig)
+furnace = Furnace(pins)
 scheduler = Scheduler(config.chipId)
-temperature = Temperature(initTemp)
+temperature = Temperature(initTemp, pins)
 
-
-# ~~~~~~~~ INIT VARIABLES ~~~~~~~~~
-global furnaceOn, previousTime, running
-furnaceOn = False
-previousTime = time.time()
-running = True
-
-# ~~~~~~~~ API URL ~~~~~~~~~~~~
-urlThermostat = ENV_API_URL + '/api/thermostat'
-
-def ioRunToggle(self):
-    config['running'] = False
-
-def scheduler(curTime):
-  global config
-  if (curTime >= config['nextScheduledTime']):
-    config['targetTemp'] = config['nextScheduledTemp']
-    readSchedule(config['nextScheduledTime'])
-
-def readSchedule(curTime):
-  # Read schedule file and return nextScheduledTemp and nextScheduledTime
-  print('readSchedule fired!')
 
 class Thermostat:
-  # def __init__(self):
+  def __init__(self):
+    self.running = True
+    self.prevTime = int(time.time())
+    GPIO.add_event_detect(pins.runTestPin, GPIO.RISING, callback=self.ioRunToggle, bouncetime=200)
+
+  def ioRunToggle(self):
+    self.running = False
 
   def run(self):
-    # Initialize listener on ioTestPin
-    GPIO.add_event_detect(ioTestPin, GPIO.FALLING, callback=ioTestToggle, bouncetime=200)
-    GPIO.add_event_detect(runTestPin, GPIO.RISING, callback=ioRunToggle, bouncetime=200)
-    sendConfig()
     # Run scheduling process
-    while config['running']:
-      global previousTime, config, ioTestPin, ioRunPin
+    try:
+      while self.running:
+        curTime = int(time.time())
+        cycleTime = curTime - self.prevTime
 
-      print(testTemp)
+        #readTemperature
+        curTemp = temperature.readTemp()
 
-      temp = readTemp()
-      curTime = time.time()
-      cycleTime = curTime - previousTime
+        # Run scheduler
+        targetTemp = scheduler.checkSchedule(curTime)
 
-      # Run scheduler
-      scheduler(cycleTime)
+        # Control furnace
+        if (curTemp < targetTemp - config.tempOffset):
+          furnace.turnOn()
+        
+        if (curTemp > targetTemp + config.tempOffset):
+          furnace.turnOff()
 
-      # Send stored temperature data
-      if (cycleTime > config['transmitDelay']):
-        previousTime = time.time()
-        sendTemp(testTemp)
+        # Send stored temperature data
+        if (cycleTime > config.processDelay):
+          self.prevTime = curTime
+          temperature.sendTemp()
 
-      sendTemp(testTemp)
-      print('ioTestPin: ', GPIO.input(ioTestPin), 'runTestPin: ',
-            GPIO.input(runTestPin), 'cycleTime: ', cycleTime)
-      time.sleep(5)
+        print('ioTestPin: ', GPIO.input(pins.ioTestPin), 'runTestPin: ', GPIO.input(pins.runTestPin), 'cycleTime: ', cycleTime)
+        time.sleep(5)
+    except KeyboardInterrupt:
+      sys.exit(0)
