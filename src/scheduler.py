@@ -1,15 +1,8 @@
-import time, threading, requests, json
+import time, requests, json
 from env.env import ENV_API_URL
+from api_urls import apiScheduler
 
-# ~~~~~~~~ INIT VARIABLES ~~~~~~~~~
-furnaceOn = False
-previousTime = time.time()
-running = True
-
-# ~~~~~~~~ API URLS ~~~~~~~~~~~~
-urlSchedule = ENV_API_URL + '/thermostat/scheduler'
-
-# ~~~~~~~~ CONFIG VARIABLES ~~~~~~~~~
+# ~~~~~~~~ TEST CONFIG VARIABLES ~~~~~~~~~
 initSchedule = dict(
   nextScheduledTime = time.time() + 300, # time since epoch for next scheduled action (in seconds)
   nextScheduledTemp = 68 # scheduled temp (deg F)
@@ -33,6 +26,6 @@ class Scheduler:
       'nextScheduledTemp': self.nextScheduledTemp,
       'nextScheduledTime': self.nextScheduledTime
     }
-    res = requests.get(url = urlSchedule, params = payload)
+    res = requests.get(url = apiScheduler, params = payload)
     self.nextScheduledTemp = res['nextScheduledTemp']
     self.nextScheduledTime = res['nextScheduledTime']

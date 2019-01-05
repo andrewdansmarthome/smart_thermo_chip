@@ -1,6 +1,6 @@
 import RPi.GPIO as GPIO
 
-class BoardSetup:
+class PinSetup:
   def __init__(self):
     self.furnacePin = 17 # pin 11 WARNING: CREATES 'PIN IN USE' WARNING
     self.tempPin = 27 # pin 13

@@ -1,10 +1,7 @@
 import RPi.GPIO as GPIO
 import time, threading, requests, json, sys
 from env.env import ENV_API_URL, ENV_LOCATION_ID
-from board_setup import BoardSetup
-
-# ~~~~~~~~ API URLS ~~~~~~~~~~~~
-urlTemperature = ENV_API_URL + '/thermostat/temperature'
+from api_urls import apiTemperature
 
 # ~~~~~ TEST VARIABLES ~~~~~~
 testTemp = dict(
@@ -18,7 +15,7 @@ testTemp = dict(
 # ~~~~~~~~ INIT VARIABLES ~~~~~~~~~
 initTemp = dict(
     # default temp setup
-    tempPin = board,
+    tempPin = 27, # see pin-setup
     temperature = 0,
     serializedTemp = 0,
     targetTemperature = 70,
@@ -37,28 +34,19 @@ class Temperature:
     self.voltageToTempFactor = tempData['voltageToTempFactor']
     self.voltageOffset = tempData['voltageOffset']
     self.tempStore = dict()
-
-  def readTemp(self):
-    self.serializedTemp = GPIO.input(self.tempPin)
-    self.temp = self.convertTemp(self.serializedTemp),
-    return self.temp
-
-  def sendTemp(self):
-    print('sendTemp has fired!')
-    # Build temp payload
+  
+  def sendTemp(self, temp):
     # Send temp data to server
-    res = requests.post(urlTemperature, json = self.tempStore)
-    if res.status_code == 204:
-      self.tempStore = dict()
-    else:
-      print('There was an error sending the bundled Temp data. Response code: ', res.status_code)
-    print('res: ', res)
-
+    print('sendTemp has fired!')
+    requests.post(apiTemperature, json=temp)
+  
   def convertTemp(self, serializedTemp):
     # Convert temperature data from ADC value to deg Farenheight
-    temp = ( serializedTemp * self.serialToVoltageFactor - self.voltageOffset ) / self.voltageToTempFactor
-    print('Converted Temp: ', temp)
-    return temp
+    print('convertTemp fired!')
   
-  def storeTemperature(self, temp):
-    self.tempStore[round(time.time()*1000)] = temp
+  def readTemp(self):
+    curVoltage = GPIO.input(self.tempPin)
+    curTime = int(time.time())
+    curTemp = self.convertTemp(curVoltage)
+    self.tempStore[curTime] = 
+

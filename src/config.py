@@ -1,6 +1,7 @@
 import RPi.GPIO as GPIO
-import time, threading, requests
+import requests
 from env.env import ENV_API_URL
+from api_urls import apiConfig
 
 # ~~~~~~~~ DEFAULT CONFIG ~~~~~~~~~
 initConfig = dict(
@@ -9,9 +10,6 @@ initConfig = dict(
   processDelay = 300, # in seconds
 )
 
-# ~~~~~~~~ API URLS ~~~~~~~~~~~~
-urlConfig = ENV_API_URL + '/thermostat/config'
-
 class Config:
   def __init__(self, setup):
     self.chipId = setup['chipId']
@@ -19,7 +17,7 @@ class Config:
     self.processDelay = setup['processDelay']
   
   def updateConfig(self):
-    res = requests.get(url = urlConfig)
+    res = requests.get(url = apiConfig)
     data = res.json()
     for item in data.keys():
       setattr(self, item, data[item])
@@ -32,6 +30,10 @@ class Config:
     # write config to static file
     print('writeConfig fired!')
     payload = self
-    res = requests.post(url = urlConfig, json = payload)
+    res = requests.post(url = apiConfig, json = payload)
     print('res: ', res)
     return res
+  
+  def sendConfig(self, config):
+    # updating config in db
+    requests.post(apiConfig, json=config)

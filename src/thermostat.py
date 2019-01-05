@@ -4,12 +4,13 @@ from env.env import ENV_API_URL, ENV_LOCATION_ID
 from config import Config, initConfig
 from scheduler import Scheduler
 from temperature import Temperature, initTemp
-from board_setup import BoardSetup
+from pin_setup import PinSetup
 
-boardSetup = BoardSetup()
+pins = PinSetup()
 config = Config(initConfig)
 scheduler = Scheduler(config.chipId)
 temperature = Temperature(initTemp)
+
 
 # ~~~~~~~~ INIT VARIABLES ~~~~~~~~~
 global furnaceOn, previousTime, running
@@ -20,39 +21,8 @@ running = True
 # ~~~~~~~~ API URL ~~~~~~~~~~~~
 urlThermostat = ENV_API_URL + '/api/thermostat'
 
-def furnaceControl(turnFurnaceOn = furnaceOn):
-  global furnaceOn
-  if (turnFurnaceOn):
-    GPIO.output(furnacePin, GPIO.HIGH)
-    furnaceOn = True
-  else:
-    GPIO.output(furnacePin, GPIO.LOW)
-    furnaceOn = False
-
-def readTemp():
-  curVoltage = GPIO.input(tempPin)
-  return convertTemp(curVoltage)
-
-def sendTemp(temp):
-  # Send temp data to server
-  print('sendTemp has fired!')
-  requests.post(urlTempData, json = temp)
-
-def convertTemp(serializedTemp):
-  # Convert temperature data from ADC value to deg Farenheight
-  print('convertTemp fired!')
-
-def readConfig():
-  # readConfig from static file
-  print('readConfig fired!')
-
-def writeConfig():
-  # write config to static file
-  print('writeConfig fired!')
-
-def sendConfig():
-	# updating config in db
-  requests.post(urlConfig, json=config)
+def ioRunToggle(self):
+    config['running'] = False
 
 def scheduler(curTime):
   global config
@@ -63,13 +33,6 @@ def scheduler(curTime):
 def readSchedule(curTime):
   # Read schedule file and return nextScheduledTemp and nextScheduledTime
   print('readSchedule fired!')
-
-def ioTestToggle():
-  furnaceControl(not furnaceOn)
-
-def ioRunToggle():
-  global config
-  config['running'] = False
 
 class Thermostat:
   # def __init__(self):
