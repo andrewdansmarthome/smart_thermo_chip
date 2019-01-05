@@ -1,6 +1,6 @@
 import RPi.GPIO as GPIO
 import time, threading, requests, json, sys
-from env.env import ENV_API_URL, ENV_LOCATION_ID
+from env_setup import ENV_API_URL, ENV_LOCATION_ID
 from config import Config, initConfig
 from scheduler import Scheduler
 from temperature import Temperature, initTemp

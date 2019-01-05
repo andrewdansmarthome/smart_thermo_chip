@@ -1,6 +1,6 @@
 import RPi.GPIO as GPIO
 import requests
-from env.env import ENV_API_URL
+from env_setup import ENV_API_URL
 from api_urls import apiConfig
 
 # ~~~~~~~~ DEFAULT CONFIG ~~~~~~~~~

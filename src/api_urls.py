@@ -1,4 +1,4 @@
-from env.env import ENV_API_URL
+from env_setup import ENV_API_URL
 
 apiRoot = ENV_API_URL
 apiConfig = ENV_API_URL + '/thermostat/config/'

@@ -1,5 +1,5 @@
 import time, requests, json
-from env.env import ENV_API_URL
+from env_setup import ENV_API_URL
 from api_urls import apiScheduler
 
 # ~~~~~~~~ TEST CONFIG VARIABLES ~~~~~~~~~

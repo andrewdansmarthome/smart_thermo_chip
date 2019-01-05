@@ -1,6 +1,6 @@
 import RPi.GPIO as GPIO
 import time, requests, json, sys
-from env.env import ENV_LOCATION_ID
+from env_setup import ENV_LOCATION_ID
 from api_urls import apiTemperature
 import Adafruit_MCP3008 as ADC
 
