@@ -5,12 +5,13 @@ This whole project is in its nascent stages! We are building a physical NEST-lik
 Lots on the to-do list.
 
 To-Do:
-- Test integration with RPi once re-structure is complete.
 - Add 10nf capacitor across sensor to ground to stabilize (and range correct) readings
 - ????
 - Profit
 
-Done: 
+Done:
+- Refactoring complete!!!
+- Test integration with RPi once re-structure is complete.
 - Restructure app to OO architecture broken out into classes.
 - Write Config method to get config from server
 - Write Scheduler method to get schedule from the server
