@@ -40,7 +40,6 @@ class Thermostat:
         # Control furnace
         if (curTemp < targetTemp - config.tempOffset):
           furnace.turnOn()
-        
         if (curTemp > targetTemp + config.tempOffset):
           furnace.turnOff()
 
