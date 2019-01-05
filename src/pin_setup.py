@@ -10,6 +10,7 @@ class PinSetup:
     self.cs = 8
     self.miso = 19
     self.mosi = 20
+    self.initializePins()
 
   def initializePins(self):
     # set mode for board pin numbering

@@ -4,15 +4,16 @@ from api_urls import apiScheduler
 
 # ~~~~~~~~ TEST CONFIG VARIABLES ~~~~~~~~~
 initSchedule = dict(
-  nextScheduledTime = time.time() + 300, # time since epoch for next scheduled action (in seconds)
+  nextScheduledTime = int(time.time()) + 300, # time since epoch for next scheduled action (in seconds)
   nextScheduledTemp = 68 # scheduled temp (deg F)
 )
 
 class Scheduler:
-  def __init__(self, schedule):
+  def __init__(self, schedule, chipId):
     self.targetTemp = schedule['nextScheduledTemp']
     self.nextScheduledTemp = schedule['nextScheduledTemp']
     self.nextScheduledTime = schedule['nextScheduledTime']
+    self.chipId = chipId
   
   def checkSchedule(self, curTime):
     if (curTime >= self.nextScheduledTime):
