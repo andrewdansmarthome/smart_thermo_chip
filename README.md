@@ -5,11 +5,12 @@ This whole project is in its nascent stages! We are building a physical NEST-lik
 Lots on the to-do list.
 
 To-Do:
-- Add 10nf capacitor across sensor to ground to stabilize (and range correct) readings
+- Gracefully handle shutdown to TURN OFF THE FURNACE when it fails
 - ????
 - Profit
 
 Done:
+- Add 10nf capacitor across sensor to ground to stabilize (and range correct) readings
 - Refactoring complete!!!
 - Test integration with RPi once re-structure is complete.
 - Restructure app to OO architecture broken out into classes.

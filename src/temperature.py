@@ -40,7 +40,9 @@ class Temperature:
     # Send temp data to server
     print('sendTemp has fired!')
     print('Temp Data: ', self.tempStore)
-    requests.post(apiTemperature, json=self.tempStore)
+    res = requests.post(apiTemperature, json=self.tempStore)
+    print('Temp response', res.json())
+    self.tempStore = []
   
   def convertTemp(self, serializedTemp):
     # Convert temperature data from ADC value to deg Farenheight
@@ -48,16 +50,18 @@ class Temperature:
     curTemp = round(rawTemp, 2)
     return curTemp
   
-  def readAndStoreTemp(self, curTime, targetTemp):
+  def readAndStoreTemp(self, curTime, targetTemp, chipId):
     curSerialTemp = self.readTemp(curTime)
     curTemp = self.convertTemp(curSerialTemp)
     tempDict = dict(
         temperature=curTemp,
         serializedValue=curSerialTemp,
         time=curTime,
-        targetTemperature=targetTemp
+        targetTemperature=targetTemp,
+        chipId=chipId
     )
     self.tempStore.append(tempDict)
+    return curTemp
 
   def readTemp(self, curTime):
     values = [0]*8

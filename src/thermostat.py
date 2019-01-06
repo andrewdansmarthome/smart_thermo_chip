@@ -34,7 +34,7 @@ class Thermostat:
         cycleTime = curTime - self.prevTime
 
         # Read Temperature and store it locally
-        curTemp = temperature.readAndStoreTemp(curTime, scheduler.targetTemp)
+        curTemp = temperature.readAndStoreTemp(curTime, scheduler.targetTemp, config.chipId)
 
         # Run scheduler
         targetTemp = scheduler.checkSchedule(curTime)
