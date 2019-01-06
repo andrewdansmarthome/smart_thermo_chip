@@ -50,7 +50,6 @@ class Thermostat:
           self.prevTime = curTime
           temperature.sendTemp()
 
-        print('ioTestPin: ', GPIO.input(pins.ioTestPin), 'runTestPin: ', GPIO.input(pins.runTestPin), 'cycleTime: ', cycleTime)
         time.sleep(1)
     except KeyboardInterrupt:
       sys.exit(0)
