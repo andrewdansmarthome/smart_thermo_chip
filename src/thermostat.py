@@ -33,8 +33,8 @@ class Thermostat:
         curTime = int(time.time())
         cycleTime = curTime - self.prevTime
 
-        #readTemperature
-        curTemp = temperature.readTemp()
+        # Read Temperature and store it locally
+        curTemp = temperature.readAndStoreTemp(curTime, scheduler.targetTemp)
 
         # Run scheduler
         targetTemp = scheduler.checkSchedule(curTime)
@@ -46,11 +46,11 @@ class Thermostat:
           furnace.turnOff()
 
         # Send stored temperature data
-        if (cycleTime > config.processDelay):
+        if (cycleTime > config.transmitDelay):
           self.prevTime = curTime
           temperature.sendTemp()
 
         print('ioTestPin: ', GPIO.input(pins.ioTestPin), 'runTestPin: ', GPIO.input(pins.runTestPin), 'cycleTime: ', cycleTime)
-        time.sleep(5)
+        time.sleep(1)
     except KeyboardInterrupt:
       sys.exit(0)

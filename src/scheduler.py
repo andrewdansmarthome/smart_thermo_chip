@@ -5,7 +5,7 @@ from api_urls import apiScheduler
 # ~~~~~~~~ TEST CONFIG VARIABLES ~~~~~~~~~
 initSchedule = dict(
   nextScheduledTime = int(time.time()) + 300, # time since epoch for next scheduled action (in seconds)
-  nextScheduledTemp = 68 # scheduled temp (deg F)
+  nextScheduledTemp = float(68) # scheduled temp (deg F)
 )
 
 class Scheduler:
@@ -14,7 +14,7 @@ class Scheduler:
     self.nextScheduledTemp = schedule['nextScheduledTemp']
     self.nextScheduledTime = schedule['nextScheduledTime']
     self.chipId = chipId
-  
+
   def checkSchedule(self, curTime):
     if (curTime >= self.nextScheduledTime):
       self.targetTemp = self.nextScheduledTemp

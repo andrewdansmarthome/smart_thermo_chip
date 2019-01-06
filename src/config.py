@@ -6,7 +6,7 @@ from api_urls import apiConfig
 # ~~~~~~~~ DEFAULT CONFIG ~~~~~~~~~
 initConfig = dict(
   chipId = '1',
-  transmitDelay = 300, # server send delay (in seconds)
+  transmitDelay = 30, # server send delay (in seconds)
   processDelay = 300, # in seconds
   tempOffset = 2
 )
