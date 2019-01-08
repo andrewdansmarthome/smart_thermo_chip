@@ -5,11 +5,15 @@ This whole project is in its nascent stages! We are building a physical NEST-lik
 Lots on the to-do list.
 
 To-Do:
+- Add minimum allowable temperature reading or force furnace on
+- Add max length of furnace run time
+- Add better control of furnace run times via config
 - Gracefully handle shutdown to TURN OFF THE FURNACE when it fails
 - ????
 - Profit
 
 Done:
+- Set override for ioTestToggle button so it doesn't keep switching every cycle
 - Add 10nf capacitor across sensor to ground to stabilize (and range correct) readings
 - Refactoring complete!!!
 - Test integration with RPi once re-structure is complete.

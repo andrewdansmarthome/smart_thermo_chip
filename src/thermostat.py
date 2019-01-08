@@ -21,7 +21,7 @@ class Thermostat:
   def __init__(self):
     self.running = True
     self.prevTime = int(time.time())
-    GPIO.add_event_detect(pins.runTestPin, GPIO.RISING, callback=self.ioRunToggle, bouncetime=200)
+    GPIO.add_event_detect(pins.runTestPin, GPIO.RISING, callback=self.ioRunToggle, bouncetime=500)
 
   def ioRunToggle(self):
     self.running = False
@@ -40,10 +40,11 @@ class Thermostat:
         targetTemp = scheduler.checkSchedule(curTime)
 
         # Control furnace
-        if (curTemp < targetTemp - config.tempOffset):
-          furnace.turnOn()
-        if (curTemp > targetTemp + config.tempOffset):
-          furnace.turnOff()
+        if (not furnace.ioOverride):
+          if (curTemp < targetTemp - config.tempOffset):
+            furnace.turnOn()
+          if (curTemp > targetTemp + config.tempOffset):
+            furnace.turnOff()
 
         # Send stored temperature data
         if (cycleTime > config.transmitDelay):

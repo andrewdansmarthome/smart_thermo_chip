@@ -6,7 +6,8 @@ class Furnace:
   def __init__(self, pins):
     self.furnacePin = pins.furnacePin
     self.furnaceOn = False
-    GPIO.add_event_detect(pins.ioTestPin, GPIO.FALLING, callback=self.ioTestToggle, bouncetime=200)
+    self.ioOverride = False
+    GPIO.add_event_detect(pins.ioTestPin, GPIO.FALLING, callback=self.ioTestToggle, bouncetime=500)
 
   def turnOn(self):
     GPIO.output(self.furnacePin, GPIO.HIGH)
@@ -16,12 +17,14 @@ class Furnace:
     GPIO.output(self.furnacePin, GPIO.LOW)
     self.furnaceOn = False
 
-  def ioTestToggle(self):
+  def ioTestToggle(self, pin):
     if (self.furnaceOn):
       GPIO.output(self.furnacePin, GPIO.LOW)
     else:
       GPIO.output(self.furnacePin, GPIO.HIGH)
     self.furnaceOn = not self.furnaceOn
+    self.ioOverride = not self.ioOverride
+    print('Toggled furnace to: ', self.ioOverride)
 
 
 
