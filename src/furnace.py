@@ -10,10 +10,12 @@ class Furnace:
     GPIO.add_event_detect(pins.ioTestPin, GPIO.FALLING, callback=self.ioTestToggle, bouncetime=500)
 
   def turnOn(self):
+    print('Furnace turned ON')
     GPIO.output(self.furnacePin, GPIO.HIGH)
     self.furnaceOn = True
   
   def turnOff(self):
+    print('Furnace turned OFF')
     GPIO.output(self.furnacePin, GPIO.LOW)
     self.furnaceOn = False
 

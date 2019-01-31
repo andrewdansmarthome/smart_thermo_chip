@@ -28,6 +28,9 @@ class Thermostat:
 
   def run(self):
     # Run scheduling process
+    test_io = False
+    if test_io == True:
+        test_io = False
     try:
       while self.running:
         curTime = int(time.time())
@@ -52,5 +55,12 @@ class Thermostat:
           temperature.sendTemp()
 
         time.sleep(1)
+        
     except KeyboardInterrupt:
+      furnace.turnOff()
       sys.exit(0)
+      
+    finally:
+      furnace.turnOff()
+      print("Runtime Error: ", sys.exc_info()[0]) 
+      self.run()  

@@ -19,10 +19,10 @@ initTemp = dict(
     tempPin = 27, # see pin-setup
     temperature = 0,
     serializedTemp = 0,
-    targetTemperature = 70.0,
+    targetTemperature = 10000,
     serialToVoltageFactor = 5110 / 1024, # Convert serial to voltage
     voltageSource = 5110, # 10 mV/degC
-    voltageOffset = 500 + 395 # tmp36 offset 500mV
+    voltageOffset = 500 # tmp36 offset 500mV
 )
 
 class Temperature:

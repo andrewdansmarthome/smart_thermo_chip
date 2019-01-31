@@ -8,7 +8,7 @@ initConfig = dict(
   chipId = '1',
   transmitDelay = 30, # server send delay (in seconds)
   processDelay = 300, # in seconds
-  tempOffset = 2
+  tempOffset = 0
 )
 
 class Config:
