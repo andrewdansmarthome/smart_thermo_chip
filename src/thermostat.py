@@ -62,5 +62,5 @@ class Thermostat:
       
     finally:
       furnace.turnOff()
-      print("Runtime Error: ", sys.exc_info()[0]) 
+      print("Runtime Error: ", sys.exc_info()) 
       sys.exit(0)
