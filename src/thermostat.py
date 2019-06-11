@@ -54,3 +54,4 @@ class Thermostat:
         time.sleep(1)
     except KeyboardInterrupt:
       sys.exit(0)
+    sys.exit(0)
