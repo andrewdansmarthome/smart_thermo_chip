@@ -3,6 +3,7 @@ import RPi.GPIO as GPIO
 class PinSetup:
   def __init__(self):
     self.furnacePin = 17 # pin 11 CREATES 'PIN IN USE' WARNING
+    self.airConPin = 'N/A' # Not connected yet
     self.tempPin = 27 # pin 13
     self.ioTestPin = 26 # pin 37
     self.runTestPin = 16 # pin 36

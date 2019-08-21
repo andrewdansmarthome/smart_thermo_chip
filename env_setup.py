@@ -11,5 +11,6 @@ def currentEnvURL(currentEnv):
     return URL_DEV_API
   return URL_PROD_API
 
-ENV_API_URL = currentEnvURL(envMode)
+ENV_SERVER = currentEnvURL(envMode)
+ENV_API_URL = ENV_SERVER + '/api'
 ENV_LOCATION_ID = LOCATION_ID

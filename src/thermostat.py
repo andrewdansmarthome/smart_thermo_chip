@@ -21,36 +21,47 @@ class Thermostat:
   def __init__(self):
     self.running = True
     self.prevTime = int(time.time())
-    GPIO.add_event_detect(pins.runTestPin, GPIO.RISING, callback=self.ioRunToggle, bouncetime=200)
+    GPIO.add_event_detect(pins.runTestPin, GPIO.RISING, callback=self.ioRunToggle, bouncetime=500)
 
   def ioRunToggle(self):
     self.running = False
 
   def run(self):
     # Run scheduling process
+    test_io = False
+    if test_io == True:
+        test_io = False
     try:
       while self.running:
         curTime = int(time.time())
         cycleTime = curTime - self.prevTime
 
-        #readTemperature
-        curTemp = temperature.readTemp()
+        # Read Temperature and store it locally
+        curTemp = temperature.readAndStoreTemp(curTime, scheduler.targetTemp, config.chipId)
 
         # Run scheduler
         targetTemp = scheduler.checkSchedule(curTime)
 
         # Control furnace
-        if (curTemp < targetTemp - config.tempOffset):
-          furnace.turnOn()
-        if (curTemp > targetTemp + config.tempOffset):
-          furnace.turnOff()
+        if (not furnace.ioOverride):
+          if (curTemp < targetTemp - config.tempOffset):
+            furnace.turnOn()
+          if (curTemp > targetTemp + config.tempOffset):
+            furnace.turnOff()
 
         # Send stored temperature data
-        if (cycleTime > config.processDelay):
+        if (cycleTime > config.transmitDelay):
           self.prevTime = curTime
           temperature.sendTemp()
 
-        print('ioTestPin: ', GPIO.input(pins.ioTestPin), 'runTestPin: ', GPIO.input(pins.runTestPin), 'cycleTime: ', cycleTime)
-        time.sleep(5)
+        time.sleep(1)
+        
     except KeyboardInterrupt:
+      furnace.turnOff()
       sys.exit(0)
+      
+    finally:
+      furnace.turnOff()
+      print("Runtime Error: ", sys.exc_info()) 
+      sys.exit(0)
+    sys.exit(0)
