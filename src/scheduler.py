@@ -4,8 +4,8 @@ from api_urls import apiScheduler
 
 # ~~~~~~~~ TEST CONFIG VARIABLES ~~~~~~~~~
 initSchedule = dict(
-  nextScheduledTime = int(time.time()) + 300, # time since epoch for next scheduled action (in seconds)
-  nextScheduledTemp = float(68) # scheduled temp (deg F)
+  nextScheduledTime = int(time.time()) + 90, # time since epoch for next scheduled action (in seconds)
+  nextScheduledTemp = float(78) # scheduled temp (deg F)
 )
 
 class Scheduler:
