@@ -1,18 +1,20 @@
 from flask import Flask
-app = Flask(__name__)
+server = Flask(__name__)
 
-@app.route('/power', methods=['POST'])
-def power()
-  print('hit power api. switching:', request)
+if __name__ == '__main__':
+  server.run(debug=True)
+
+@server.route('/power', methods=['POST'])
+def power():
+  print('hit power api. switching:')
   return 'power'
 
-@app.route('/schedule', methods=['POST'])
-def schedule()
-  print('schedule api hit', request)
+@server.route('/schedule', methods=['POST'])
+def schedule():
+  print('schedule api hit')
   return 'schedule'
 
-@app.route('/hold', methods=['POST'])
-def hold()
-  print('hold request hit:', request)
+@server.route('/hold', methods=['POST'])
+def hold(): 
+  print('hold request hit:')
   return 'hold'
-
