@@ -7,9 +7,10 @@ from server.server import thermostat_server
 
 app = Flask(__name__)
 app.register_blueprint(thermostat_server)
-
-if __name__ == '__main__':
-  app.run(debug=True)
+@app.route('/')
+def test():
+  print('hit test route')
+  return 'test service'
 
 # For dev mode, run with command: python3 main.py DEV
 
@@ -24,15 +25,19 @@ if __name__ == '__main__':
 smartThermo = Thermostat()
 
 # Init threads
-smartThermoThread = threading.Thread(Thermostat)
+smartThermoThread = threading.Thread(target=smartThermo.run)
 
 try:
   while True:
     print('What would you like to start? (a=all, t=thermostat): ')
-    launch = input()
-    if (launch == 't') or (launch == 'a'):
-      # start thermostat controls in thread
-      smartThermoThread.start()
+    # launch = input()
+    # if (launch == 't') or (launch == 'a'):
+    # start thermostat controls in thread
+    smartThermoThread.start()
+    if __name__ == '__main__':
+      # threading.Thread(target=app.run, kwargs={"debug": True}).start()
+      app.run(debug=True)
+    # smartThermo.run()
 finally:
   if smartThermoThread.is_alive():
     smartThermoThread.exit()

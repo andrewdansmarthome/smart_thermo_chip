@@ -38,6 +38,7 @@ class Thermostat:
 
         # Read Temperature and store it locally
         curTemp = temperature.readAndStoreTemp(curTime, scheduler.targetTemp, config.chipId)
+        print(curTemp)
 
         # Run scheduler
         targetTemp = scheduler.checkSchedule(curTime)
