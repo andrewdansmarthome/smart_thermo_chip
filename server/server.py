@@ -1,10 +1,15 @@
-from flask import Flask, Blueprint
-from src.thermostat import furnace
+from flask import current_app, Blueprint
 thermostat_server = Blueprint('thermostat_server', __name__)
+
+@thermostat_server.route('/')
+def test():
+  print('hit test route')
+  return 'test service'
 
 @thermostat_server.route('/power', methods=['POST'])
 def power():
   print('hit power api. switching:')
+  furnace = current_app.config['furnace']
   furnace.toggleAuto()
   return 'power toggled'
 

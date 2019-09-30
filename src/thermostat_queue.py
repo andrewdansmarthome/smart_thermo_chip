@@ -74,9 +74,10 @@ class Thermostat:
         try:
           function, args, kwargs = self.q.get(timeout=self.timeout)
           function(*args, **kwargs)
-        except queue.Empty:
+        finally:
           self.tempCycle()
-          
+          time.sleep(1)
+
     except KeyboardInterrupt:
       furnace.turnOff()
       sys.exit(0)
