@@ -1,4 +1,4 @@
-from flask import Flask, Blueprint
+from flask import Flask
 from server.server import thermostat_server
 
 def create_app(smartThermo, furnace):
